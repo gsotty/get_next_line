@@ -1,0 +1,125 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line_test5.c                              :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: gsotty <marvin@42.fr>                      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2016/11/23 16:14:57 by gsotty            #+#    #+#             */
+/*   Updated: 2016/11/29 13:02:07 by gsotty           ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "get_next_line.h"
+
+static void		ft_bufline(t_file *file, int tmp_len, char *buf)
+{
+	int	y;
+	int	x;
+	int	buf_len;
+
+	x = 0;
+	y = 1;
+	buf_len = BUFF_SIZE + tmp_len;
+	while (buf[x] != '\0' && y == 1)
+	{
+		if (buf[x] == '\n')
+		{
+			y = 0;
+			ft_memmove(file->tmp, (buf + x + 1), buf_len);
+			buf[x] = '\0';
+		}
+		x++;
+	}
+}
+
+static int		ft_bufnoline(t_file *file, char *buf)
+{
+	int		ret;
+	char	*tmp2;
+
+	ret = 0;
+	if (!(tmp2 = (char *)ft_memalloc(sizeof(char) * BUFF_SIZE + 1)))
+		return (-1);
+	if ((ret = read(file->fd, tmp2, BUFF_SIZE)) == 0)
+		return (0);
+	tmp2[ret] = '\0';
+	buf = ft_strjoin(buf, tmp2);
+	free(tmp2);
+	return (1);
+}
+
+static int		ft_while(t_file *file, int tmp_len, char *buf)
+{
+	int		z;
+
+	z = 0;
+	while (buf[z] != '\0')
+	{
+		if (buf[z] == '\n' || buf[z] == '\0')
+		{
+			ft_bufline(file, tmp_len, buf);
+			return (1);
+		}
+		if (buf[z + 1] == '\0')
+		{
+			if ((ft_bufnoline(file, buf)) == 0)
+				return (1);
+		}
+		z++;
+	}
+	return (0);
+}
+
+static t_file	*ft_malloc(const int fd, t_file *file, char *buf)
+{
+	if (file == NULL)
+	{
+		if (!(file = (t_file *)malloc(sizeof(t_file) * 1)))
+			return (NULL);
+		file->tmp = NULL;
+	}
+	if (file->tmp == NULL)
+	{
+		if (!(buf = ft_memalloc(BUFF_SIZE + 1)))
+			return (NULL);
+	}
+	else
+	{
+		if (!(buf = ft_memalloc(BUFF_SIZE + ft_strlen(file->tmp))))
+			return (NULL);
+	}
+	file->fd = fd;
+	return (file);
+}
+
+int				get_next_line(const int fd, char **line)
+{
+	int				tmp_len;
+	int				ret;
+	int				finish;
+	char			*buf;
+	static t_file	*file;
+
+	finish = -1;
+	if (fd < 0 || line == NULL)
+		return (-1);
+	if (!(buf = ft_memalloc(BUFF_SIZE + 1)))
+		return (-1);
+	if (!(file = ft_malloc(fd, file, buf)))
+		return (-1);
+	if ((file->tmp) == NULL)
+		if (!(file->tmp = ft_memalloc(BUFF_SIZE)))
+			return (-1);
+	if ((ret = read(file->fd, buf, BUFF_SIZE)) == -1)
+		return (-1);
+	buf[ret] = '\0';
+	buf = ft_strjoin(file->tmp, buf);
+	tmp_len = ft_strlen(file->tmp);
+	free(file->tmp);
+	if (!(file->tmp = ft_memalloc(BUFF_SIZE + ft_strlen(buf))))
+		return (-1);
+	finish = ft_while(file, tmp_len, buf);
+	*line = buf;
+	return (finish);
+}
