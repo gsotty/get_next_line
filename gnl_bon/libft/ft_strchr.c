@@ -1,35 +1,29 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_sqrt.c                                          :+:      :+:    :+:   */
+/*   ft_strchr.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsotty <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/12/02 15:04:18 by gsotty            #+#    #+#             */
-/*   Updated: 2016/12/02 15:25:29 by gsotty           ###   ########.fr       */
+/*   Created: 2016/11/04 16:21:49 by gsotty            #+#    #+#             */
+/*   Updated: 2016/11/11 15:45:55 by gsotty           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-int	ft_sqrt(int nb)
+char	*ft_strchr(const char *s, int c)
 {
-	int	i;
-	int	ret;
+	size_t	x;
 
-	i = 2;
-	ret = 0;
-	if (nb < 0)
-		return (0);
-	if (nb == 1)
-		return (1);
-	while (i <= nb / 2)
+	x = 0;
+	while (x <= ft_strlen(s))
 	{
-		if (i * i == nb)
+		if (s[x] == c)
 		{
-			return (i);
+			return ((char *)s + x);
 		}
-		i++;
+		x++;
 	}
-	return (0);
+	return (NULL);
 }

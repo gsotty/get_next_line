@@ -1,19 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_putstr2.c                                       :+:      :+:    :+:   */
+/*   ft_strmap.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsotty <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2016/11/14 11:03:05 by gsotty            #+#    #+#             */
-/*   Updated: 2016/11/14 11:05:50 by gsotty           ###   ########.fr       */
+/*   Created: 2016/11/06 09:35:31 by gsotty            #+#    #+#             */
+/*   Updated: 2016/11/12 17:06:44 by gsotty           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
-#include <unistd.h>
+#include <stdlib.h>
 
-void	ft_putstr2(char *str)
+char	*ft_strmap(char const *s, char (*f)(char))
 {
-	write(2, str, ft_strlen(str));
+	int		x;
+	int		len;
+	char	*tab;
+
+	if (s == NULL || f == NULL)
+		return (NULL);
+	x = 0;
+	len = ft_strlen(s);
+	if ((tab = (char *)malloc(sizeof(char) * len + 1)) == NULL)
+		return (NULL);
+	while (s[x] != '\0')
+	{
+		tab[x] = (f)(s[x]);
+		x++;
+	}
+	tab[x] = '\0';
+	return (tab);
 }

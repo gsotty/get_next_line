@@ -6,7 +6,7 @@
 /*   By: gsotty <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2016/11/23 17:21:51 by gsotty            #+#    #+#             */
-/*   Updated: 2016/11/30 10:17:16 by gsotty           ###   ########.fr       */
+/*   Updated: 2017/01/06 17:28:55 by gsotty           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@
 # include <unistd.h>
 # include <stdlib.h>
 
-# define BUFF_SIZE 1
+# define BUFF_SIZE 7
 
 typedef struct		s_file
 {

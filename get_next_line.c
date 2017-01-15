@@ -1,110 +1,147 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*   git_next_line_2.c                                  :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: gsotty <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2017/01/02 11:50:34 by gsotty            #+#    #+#             */
-/*   Updated: 2017/01/02 14:19:43 by gsotty           ###   ########.fr       */
+/*   Created: 2017/01/13 12:11:12 by gsotty            #+#    #+#             */
+/*   Updated: 2017/01/13 15:51:47 by gsotty           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <stdlib.h>
-
 #include <unistd.h>
 #include <fcntl.h>
 
-int		ft_str_line(char *line, int len)
+int		verif_space(char *str)
 {
 	int		x;
 
 	x = 0;
-	while (x < len)
+	if (str == NULL)
+		return (0);
+	while (str[x] != '\0')
 	{
-		if (line[x] == '\0')
-			return (0);
-		if (line[x] == '\n')
+		if (str[x] == '\n')
 			return (1);
 		x++;
 	}
 	return (0);
 }
 
+void	cut_tmp_buf(char **rest, char **tmp_buf)
+{
+	int		x;
+	char	*rest_tmp;
+	char	*tmp_buf_2;
+
+	x = 0;
+	rest_tmp = *rest;
+	tmp_buf_2 = *tmp_buf;
+	while (tmp_buf_2[x] != '\0')
+	{
+		if (tmp_buf_2[x] == '\n')
+		{
+			tmp_buf_2[x] = '\0';
+			break ;
+		}
+		x++;
+	}
+	rest_tmp = ft_strdup(tmp_buf_2 + x + 1);
+	ft_strdel(rest);
+	*rest = rest_tmp;
+	*tmp_buf = tmp_buf_2;
+}
+
 int		get_next_line(const int fd, char **line)
 {
-	int			ret;
-	char		*buf;
-	char		*tmp_buf;
-	static char	tmp[BUFF_SIZE + 1];
+	int				ret;
+	char			*buf;
+	char			*tmp;
+	char			*tmp_buf;
+	char			*tmp_join;
+	static char		*rest = NULL;
 
 	buf = NULL;
-	ret = 0;
-	if (fd < 0)
+	tmp_buf = NULL;
+	tmp_join = NULL;
+	ret = BUFF_SIZE;
+	if (fd < 0 || BUFF_SIZE > 1000000)
 		return (-1);
-	if (!(buf = (char *)malloc(sizeof(char) *
-					(BUFF_SIZE + ft_strlen(tmp) + 1))))
-		return (-1);
-	buf = NULL;
-	while (ret == 0)
+	while (verif_space(tmp_buf) == 0 && ret == BUFF_SIZE)
 	{
-		if (!(tmp_buf = (char *)malloc(sizeof(char) *
-						(BUFF_SIZE + ft_strlen(tmp_buf) + 1))))
-			return (-1);
-		if (!(ret = read(fd, tmp_buf, BUFF_SIZE)))
-			return (0);
-		//ft_memmove(tmp, buf, BUFF_SIZE);
-		tmp_buf[ret] = '\0';
-		ft_putstr("buf = ");
-		ft_putstr(buf);
-		ft_putstr("\n");
-		ft_putstr("tmp_buf = ");
-		ft_putstr(tmp_buf);
-		ft_putstr("\n");
-		if (buf == NULL)
+		if (verif_space(rest) == 1)
 		{
-			buf = tmp_buf;
-			ret = 0;
+			ft_strdel(&tmp_buf);
+			tmp_buf = ft_strdup(rest);
+			ft_strdel(&rest);
 		}
-		else if ((ft_str_line(tmp_buf, ft_strlen(tmp_buf)) == 0))
+		else
 		{
-			buf = ft_strjoin(buf, tmp_buf);
-		//	ft_putstr("buf 2 = ");
-		//	ft_putstr(buf);
-		//	ft_putstr("\n");
-		//	ft_putstr("tmp_buf 2 = ");
-		//	ft_putstr(tmp_buf);
-		//	ft_putstr("\n");
-			ret = 0;
+			tmp = ft_strdup(tmp_buf);
+			ft_strdel(&tmp_buf);
+			tmp_buf = ft_strnew(BUFF_SIZE);
+			if ((ret = read(fd, tmp_buf, BUFF_SIZE)) == -1)
+				return (-1);
+			tmp_buf[ret] = '\0';
+			if (tmp != NULL)
+			{
+				tmp_join = ft_strjoin(tmp, tmp_buf);
+				ft_strdel(&tmp_buf);
+				tmp_buf = ft_strdup(tmp_join);
+				ft_strdel(&tmp_join);
+				ft_strdel(&tmp);
+			}
+			if (rest != NULL)
+			{
+				tmp_join = ft_strjoin(rest, tmp_buf);
+				ft_strdel(&tmp_buf);
+				tmp_buf = ft_strdup(tmp_join);
+				ft_strdel(&tmp_join);
+				ft_strdel(&rest);
+			}
 		}
 	}
-	*line = buf;
-//	free(buf);
+	if (ret < BUFF_SIZE && verif_space(tmp_buf) == 0 && ret != 0)
+	{
+		ft_strdel(&buf);
+		buf = ft_strdup(tmp_buf);
+		ft_strdel(&tmp_buf);
+		*line = buf;
+	}
+	else
+	{
+		cut_tmp_buf(&rest, &tmp_buf);
+		*line = tmp_buf;
+	}
+	if (ret == 0 && (ft_strlen(tmp_buf) == 0))
+		return (0);
 	return (1);
 }
 
-int		main(int argc, char **argv)
+/*int			main(int argc, char **argv)
 {
-	int		x;
 	int		fd;
+	int		ret;
 	char	*line;
 
-	x = 0;
 	if (argc != 1)
 	{
 		if ((fd = open(argv[1], O_RDONLY)) == -1)
 			return (-1);
-		while (get_next_line(fd, &line))
+		while ((ret = get_next_line(fd, &line)))
 		{
-		//	ft_putstr("333\n");
-	//		ft_putstr(line);
-	//		ft_putstr("\n");
+			if (ret == -1)
+				return (0);
+//			ft_putstr("line = ");
+			ft_putstr(line);
+			ft_putstr("\n");
 			free(line);
-			x++;
 		}
 		if (close(fd) == 1)
 			return (-1);
 	}
 	return (0);
-}
+}*/
