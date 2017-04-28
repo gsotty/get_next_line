@@ -6,13 +6,12 @@
 /*   By: gsotty <marvin@42.fr>                      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2017/01/14 15:27:18 by gsotty            #+#    #+#             */
-/*   Updated: 2017/01/15 13:48:57 by gsotty           ###   ########.fr       */
+/*   Updated: 2017/01/16 14:53:51 by gsotty           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 #include <fcntl.h>
-#include <stdlib.h>
 
 int	main(int argc, char **argv)
 {
